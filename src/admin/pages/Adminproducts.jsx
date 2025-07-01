@@ -181,8 +181,10 @@ function Adminproducts() {
                   <p className='text-gray-700 font-bold'>Price: <span className='ms-3 text-emerald-800 text-lg'>$45.00</span></p>
                 </div>
 
-                <div className='mt-5 flex justify-end'>
+                <div className='mt-5 flex justify-end gap-2'>
                   <button onClick={() => setModalStatus(true)} className='bg-blue-200 px-3 py-2 rounded-lg text-blue-700'>View Details</button>
+
+                  <button className='bg-red-700 px-3 py-2 rounded-lg text-white '>Delete</button>
                 </div>
               </div>
 
@@ -199,8 +201,10 @@ function Adminproducts() {
                   <p className='text-gray-700 font-bold'>Price: <span className='ms-3 text-emerald-800 text-lg'>$45.00</span></p>
                 </div>
 
-                <div className='mt-5 flex justify-end'>
+                <div className='mt-5 flex justify-end gap-2'>
                   <button onClick={() => setModalStatus(true)} className='bg-blue-200 px-3 py-2 rounded-lg text-blue-700'>View Details</button>
+
+                  <button className='bg-red-700 px-3 py-2 rounded-lg text-white '>Delete</button>
                 </div>
               </div>
 
@@ -218,8 +222,10 @@ function Adminproducts() {
                   <p className='text-gray-700 font-bold'>Price: <span className='ms-3 text-emerald-800 text-lg'>$45.00</span></p>
                 </div>
 
-                <div className='mt-5 flex justify-end'>
+                <div className='mt-5 flex justify-end gap-2'>
                   <button onClick={() => setModalStatus(true)} className='bg-blue-200 px-3 py-2 rounded-lg text-blue-700'>View Details</button>
+
+                  <button className='bg-red-700 px-3 py-2 rounded-lg text-white '>Delete</button>
                 </div>
               </div>
 

@@ -125,9 +125,14 @@ function Profile() {
               </div>
 
               <div>
-                <img src="https://png.pngtree.com/png-vector/20220622/ourmid/pngtree-accepted-received-sign-acknowledged-vector-png-image_18870198.png" alt="" className='w-[100px] h-[80px]' />
-                <img src="https://freepngimg.com/thumb/categories/1838.png" alt="" className='w-[100px] h-[80px]' />
+                {/* pending image */}
                 <img src="https://png.pngtree.com/png-vector/20230830/ourmid/pngtree-pending-imminent-rubber-stamp-image_9932560.png" alt="" className='w-[100px] h-[80px]' />
+                {/* accepted */}
+                <img src="https://png.pngtree.com/png-vector/20220622/ourmid/pngtree-accepted-received-sign-acknowledged-vector-png-image_18870198.png" alt="" className='w-[100px] h-[80px]' />
+                {/* rejected */}
+                <img src="https://freepngimg.com/thumb/categories/1838.png" alt="" className='w-[100px] h-[80px]' />
+
+                <div className='flex justify-end'><button className='bg-red-700 px-3 py-2 rounded-lg text-white w-full'>Delete</button></div>
               </div>
             </div>
 

@@ -84,7 +84,7 @@ function Adminsidebar() {
   return (
     <>
 
-    <div className='bg-stone-300 w-full md:h-screen flex items-center flex-col'>
+    <div className='bg-stone-300 w-full md:h-full flex items-center flex-col'>
 
         <div className='my-5 bg-emerald-950 w-[180px] h-[180px] rounded-full flex justify-center items-center flex-col'>
             <img src="https://cdn-icons-png.flaticon.com/512/4596/4596668.png" alt="no image" style={{width:'120px' , height:'120px' , borderRadius:'50%', marginTop:'-40px'}} />

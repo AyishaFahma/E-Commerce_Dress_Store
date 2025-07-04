@@ -20,6 +20,8 @@ export const viewSingleProductApi = async(id)=>{
 }
 
 
+
+
 // ----------------------ADMIN----------------------
 
 //api to add a new product
@@ -36,4 +38,15 @@ export const viewAllProductApi = async()=>{
 //api to delete a product
 export const removeProductApi = async(id)=>{
     return await commonApi('DELETE' , `${serverurl}/delete-product/${id}`)
+}
+
+
+
+
+
+//-----------------------USER-----------------------------------
+
+//api to get all products in userside
+export const viewAllProductUserApi = async(reqHeader)=>{
+    return await commonApi('GET', `${serverurl}/view-allproduct-user` , "", reqHeader)
 }

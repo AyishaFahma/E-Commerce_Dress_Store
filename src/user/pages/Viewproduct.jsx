@@ -1,14 +1,48 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../../components/Footer'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCamera, faMessage, faPaperPlane, faPlane, faScaleBalanced, faStar, faTape, faTruck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { faSignalMessenger } from '@fortawesome/free-brands-svg-icons/faSignalMessenger'
+import { useParams } from 'react-router-dom'
+import { viewSingleProductApi } from '../../sevices/allApi'
+import { toast } from 'react-toastify'
+import { serverurl } from '../../sevices/serverurl'
 
 function Viewproduct() {
     //modal clicking state for size chart
     const [modalStatus, setModalStatus] = useState(false)
+
+    //state to store a single product
+    const [viewProduct, setviewProduct] = useState([])
+
+
+    const {id} = useParams()
+    console.log(id);
+
+    //to view a single product
+    const getSingleProduct = async(id)=>{
+
+        const result = await viewSingleProductApi(id)
+        console.log(result);
+
+        if(result.status == 200){
+            setviewProduct(result.data)
+        }
+        else{
+            toast.error('Something went wrong')
+        }
+        
+    }
+    console.log(viewProduct);
+    
+
+
+    useEffect( ()=>{
+        getSingleProduct(id)
+    },[])
+    
 
 
     return (
@@ -20,29 +54,27 @@ function Viewproduct() {
                 {/* image of product */}
                 <div className='md:grid grid-cols-2 gap-2'>
 
-                    <div className='md:mb-0 mb-2 h-[450px] w-full overflow-hidden group cursor-zoom-in'>
-                        <img src="https://assets.myntassets.com/h_1440,q_100,w_1080/v1/assets/images/24880870/2023/9/9/d7b9df81-7edc-4ed3-be24-176b9824e9ba1694258294003DressBerryMagentaCrepeStyledBackTop1.jpg" alt="no image" className='h-full w-full  object-cover transition-transform duration-500 ease-in-out group-hover:scale-150' />
+                    {viewProduct?.uploadImages?.map( (item, index)=> (
+                        <div className='md:mb-0 mb-2 h-[450px] w-full overflow-hidden group cursor-zoom-in' key={index}>
+                        <img src={`${serverurl}/imgUpload/${item.filename}`} alt="no image" className='h-full w-full  object-cover transition-transform duration-500 ease-in-out group-hover:scale-150' />
                     </div>
+                    )) }
 
-                    <div className='md:mb-0 mb-2 h-[450px] w-full overflow-hidden group cursor-zoom-in'>
-                        <img src="https://assets.myntassets.com/w_412,q_60,dpr_2,fl_progressive/assets/images/24881014/2023/9/9/31611620-4d64-4c52-881e-2be2f9214e271694256266348DressBerryMagentaCrepeStyledBackTop2.jpg" alt="no image" className='h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-150' />
-                    </div>
+                    
 
-                    <div className='md:mb-0 mb-2 h-[450px] w-full overflow-hidden group cursor-zoom-in'>
-                        <img src="https://assets.myntassets.com/w_412,q_60,dpr_2,fl_progressive/assets/images/24881014/2023/9/9/fab59064-6f41-46e7-bba8-261e6445c2ea1694256266329DressBerryMagentaCrepeStyledBackTop6.jpg" alt="no image" className='h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-150' />
-                    </div>
+                    
 
                 </div>
 
                 {/* details of product */}
                 <div className='md:px-20 px-5'>
-                    <h1 className='font-bold md:text-3xl text-xl mb-5 md:mt-0 mt-5'>Karen Millen Orange Dress</h1>
+                    <h1 className='font-bold md:text-3xl text-xl mb-5 md:mt-0 mt-5'>{viewProduct?.title}</h1>
 
                     <img src="https://icon-library.com/images/icon-replace/icon-replace-25.jpg" alt="no image" className='w-[50px] h-[50px]' />
 
-                    <button className='border border-gray-300 py-1 px-3 font-semibold text-lg my-5'>4 <FontAwesomeIcon icon={faStar} bounce className='text-emerald-700 me-3' />| <span className='font-medium text-sm'> Rated by Swap Fashion</span> </button>
+                    <button className='border border-gray-300 py-1 px-3 font-semibold text-lg my-5'>{viewProduct?.rating} <FontAwesomeIcon icon={faStar} bounce className='text-emerald-700 me-3' />| <span className='font-medium text-sm'> Rated by Swap Fashion</span> </button>
 
-                    <h1><span className='font-bold md:text-xl text-lg me-5'>MRP . 2,499.00 </span><s className='text-gray-500 font-semibold'>MRP . 15,000.00</s></h1>
+                    <h1><span className='font-bold md:text-xl text-lg me-5'>MRP  {viewProduct?.dprice}.00 </span><s className='text-gray-500 font-semibold'>MRP  {viewProduct?.price}.00</s></h1>
 
                     <button className='px-4 py-2 my-5 bg-stone-200 text-xs'>KNOW MORE ABOUT THE PRODUCT <FontAwesomeIcon icon={faWhatsapp} style={{ color: "#044903" }} className='ms-2 text-xl' /></button>
                     <br />
@@ -144,7 +176,7 @@ function Viewproduct() {
                         <select
                             id="size"
                             name="size"
-                            value=""
+                            value={viewProduct?.size}
 
                             className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-gray-500">
                             <option value="XS">XS</option>
@@ -155,7 +187,7 @@ function Viewproduct() {
                         </select>
 
                         {/* Selected size heading */}
-                        <h1 className="text-sm text-gray-800 mt-5">Size <span className='font-semibold ms-3'>XL</span></h1>
+                        <h1 className="text-sm text-gray-800 mt-5">Size <span className='font-semibold ms-3'>{viewProduct?.size}</span></h1>
                     </div>
 
 
@@ -170,14 +202,14 @@ function Viewproduct() {
                     {/* description of the product */}
 
                     <h1 className='text-lg text-gray-700 mb-3'>PRODUCT DETAILS</h1>
-                    <h1 className='text-sm text-gray-800'>Colour: Blue</h1>
-                    <h1 className='text-sm text-gray-800'>Condition: Good as new</h1>
-                    <h1 className='text-sm text-gray-800'>Material: Cotton,Polyester</h1>
-                    <h1 className='text-sm text-gray-800'>Bust: 42</h1>
-                    <h1 className='text-sm text-gray-800'>Waist: 44</h1>
-                    <h1 className='text-sm text-gray-800'>Hip: 48</h1>
-                    <h1 className='text-sm text-gray-800'>Front Length: 36</h1>
-                    <h1 className='text-sm text-gray-800'>Back Length: 36</h1>
+                    <h1 className='text-sm text-gray-800'>Colour: {viewProduct?.color}</h1>
+                    <h1 className='text-sm text-gray-800'>Condition: {viewProduct?.condition}</h1>
+                    <h1 className='text-sm text-gray-800'>Material: {viewProduct?.material}</h1>
+                    <h1 className='text-sm text-gray-800'>Bust: {viewProduct?.bust}</h1>
+                    <h1 className='text-sm text-gray-800'>Waist: {viewProduct?.waist}</h1>
+                    <h1 className='text-sm text-gray-800'>Hip: {viewProduct?.hip}</h1>
+                    <h1 className='text-sm text-gray-800'>Front Length: {viewProduct?.frontlength}</h1>
+                    <h1 className='text-sm text-gray-800'>Back Length: {viewProduct?.backlength}</h1>
 
                     <h1 className='mt-5 text-sm text-gra-700 font-semibold'><FontAwesomeIcon icon={faTruck} className='me-3' /> You have got FREE SHIPPING</h1>
 

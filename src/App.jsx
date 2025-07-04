@@ -38,7 +38,7 @@ function App() {
 
         <Route path='/collection-all' element={ <Shopall />} />
 
-        <Route path='/view-product' element={ <Viewproduct />} />
+        <Route path='/view-product/:id' element={ <Viewproduct />} />
 
         <Route path='/collection-dresses' element={ <Dresses />} />
 

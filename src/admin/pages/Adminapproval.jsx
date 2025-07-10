@@ -1,15 +1,91 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Adminheader from '../components/Adminheader'
 import Adminsidebar from '../components/Adminsidebar'
 import Footer from '../../components/Footer'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
+import { approveProductApi, getAllUserProductApi, getSingleUserItemApi, rejectProductApi } from '../../sevices/allApi'
+import { serverurl } from '../../sevices/serverurl'
 
 function Adminapproval() {
 
   //modal clicking state for view details button
   const [modalStatus, setModalStatus] = useState(false)
+
+  //state to hold all user selled products
+  const [allUserProduct, setallUserProduct] = useState([])
+
+  //state to view single item when viewdetails button click
+  const [viewItem, setviewItem] = useState([])
+
+  //stste to hold approve products
+  const [approveStatus, setapproveStatus] = useState([])
+
+  //state to hold rejected product
+  const [rejectStatus, setrejectStatus] = useState([])
+
+
+
+  //get all selled products
+  const viewAllUserProduct = async()=>{
+
+    const result = await getAllUserProductApi()
+    //console.log(result);
+    setallUserProduct(result.data)
+    
+  }
+  console.log(allUserProduct);
+
+
+  //to view single item when view details modal opens
+  const viewSingleItem = async(id)=>{
+
+    const result = await getSingleUserItemApi(id)
+    //console.log(result);
+    setviewItem(result.data)
+    
+  }
+  console.log(viewItem);
+
+
+  //approveproduct
+  const approveProduct = async(id)=>{
+
+    const result = await approveProductApi(id)
+    //console.log(result);
+    if(result.status == 200){
+    setapproveStatus(result.data)
+    }
+  }
+  console.log(approveStatus);
+
+
+  //reject product
+  const rejectProduct = async(id)=>{
+
+    const result = await rejectProductApi(id)
+    //console.log(result);
+    if(result.status == 200){
+      setrejectStatus(result.data)
+    }  
+  }
+  console.log(rejectStatus);
+  
+
+  
+ 
+
+  useEffect( ()=>{
+
+    viewAllUserProduct()
+
+  },[approveStatus , rejectStatus])
+
+
+
+
+
   return (
     <>
       <Adminheader />
@@ -27,66 +103,46 @@ function Adminapproval() {
           <div className='md:grid grid-cols-2 md:my-10 my-5 gap-x-20'>
             {/* first column */}
 
-            <div className='mb-5 p-5 bg-stone-50 rounded-lg shadow-lg/20 border border-stone-200'>
+            { allUserProduct?.length > 0 ? 
+              allUserProduct?.map( (item , index) => ( 
+
+                <div className='mb-5 p-5 bg-stone-50 rounded-lg shadow-lg/20 border border-stone-200' key={index}>
               <div className='flex justify-between items-center'>
-                <h1 className='text-xl font-bold'>Summer Floral Midi Dress</h1>
-                <button className=' p-3 rounded-full bg-amber-100 text-amber-900 font-bold'>Pending</button>
+                <h1 className='text-xl font-bold'>{item?.title.slice(0,20)}...</h1>
+
+                {item?.status == "Pending" ? <button className=' p-3 rounded-full bg-amber-100 text-amber-900 font-bold'>Pending</button> : item?.status == "Approved" ?
+                // accepted 
+                <button className=' p-3 rounded-full bg-green-100 text-green-900 font-bold'>Accepted</button> :
+                //  rejected  
+                <button className=' p-3 rounded-full bg-red-100 text-red-900 font-bold'>Rejected</button>}
+
               </div>
 
               <div className='mt-3'>
-                <img src="https://hips.hearstapps.com/hmg-prod/images/amazon-winter-dress-2183276870-6736192f0484c.jpg?crop=0.492xw:0.984xh;0.250xw,0&resize=640:*" alt="" className='w-full h-[200px] object-cover rounded-xl' />
+                <img src={`${serverurl}/imgUpload/${item?.uploadImages?.[0]?.filename}`} alt="" className='w-full h-[200px] object-cover rounded-xl' />
 
-                <p className='mt-4 mb-2 text-gray-700 font-bold'>User:<span className='text-lg text-black ms-3'> Jane Smith</span></p>
-                <p className='text-gray-700 font-bold'>Proposed Price: <span className='ms-3 text-emerald-800 text-lg'>$45.00</span></p>
+                <p className='mt-4 mb-2 text-gray-700 font-bold'>UserMail:<span className='text-lg text-black ms-3'> {item?.userMail}</span></p>
+                <p className='text-gray-700 font-bold'>Proposed Price: <span className='ms-3 text-emerald-800 text-lg'>${item?.dprice}.00</span></p>
               </div>
 
               <div className='mt-5 flex justify-end'>
-                <button onClick={()=>setModalStatus(true)} className='me-5 bg-blue-200 px-3 py-2 rounded-lg text-blue-700'>View Details</button>
-                <button className='bg-green-700 px-3 py-2 rounded-lg text-white'>Accept</button>
-              </div>
-              <div className='flex justify-end mt-3'><button className='bg-red-700 px-3 py-2 rounded-lg text-white '>Reject</button></div>
-            </div>
 
-            {/* second column */}
-            <div className='mb-5 p-5 bg-stone-50 rounded-lg shadow-lg/20 border border-stone-200'>
-              <div className='flex justify-between items-center'>
-                <h1 className='text-xl font-bold'>Summer Floral Midi Dress</h1>
-                <button className=' p-3 rounded-full bg-green-100 text-green-900 font-bold'>Accepted</button>
+                <button type='button' onClick={()=>{  viewSingleItem(item._id) ; setModalStatus(true) }  } className='me-5 bg-blue-200 px-3 py-2 rounded-lg text-blue-700'>View Details</button>
+
+                { item?.status == "Pending" && <button type='button' onClick={()=>approveProduct(item._id)} className='bg-green-700 px-3 py-2 rounded-lg text-white'>Accept</button>}
+
               </div>
 
-              <div className='mt-3'>
-                <img src="https://www.alamodelabel.in/cdn/shop/files/775FEF49-B998-4706-A24D-3D9A6FCA9595_800x.jpg?v=1749207263" alt="" className='w-full h-[200px] object-cover rounded-xl' />
-
-                <p className='mt-4 mb-2 text-gray-700 font-bold'>User:<span className='text-lg text-black ms-3'> Jane Smith</span></p>
-                <p className='text-gray-700 font-bold'>Proposed Price: <span className='ms-3 text-emerald-800 text-lg'>$45.00</span></p>
-              </div>
-
-              <div className='mt-5 flex justify-end'>
-                <button onClick={()=>setModalStatus(true)} className='bg-blue-200 px-3 py-2 rounded-lg text-blue-700'>View Details</button>
+              <div className='flex justify-end mt-3'>
+                { item?.status == "Pending" && <button type='button' onClick={()=>rejectProduct(item._id)}  className='bg-red-700 px-3 py-2 rounded-lg text-white '>Reject</button>}
               </div>
 
             </div>
+              )) 
 
-            {/* third item */}
+            :
+            <p className='text-2xl font-bold'>Loading.....</p>  }
 
-            <div className='mb-5 p-5 bg-stone-50 rounded-lg shadow-lg/20 border border-stone-200'>
-              <div className='flex justify-between items-center'>
-                <h1 className='text-xl font-bold'>Summer Floral Midi Dress</h1>
-                <button className=' p-3 rounded-full bg-red-100 text-red-900 font-bold'>Rejected</button>
-              </div>
-
-              <div className='mt-3'>
-                <img src="https://img.kwcdn.com/product/fancy/b002b2e9-4837-47a8-aac8-a7c9dcff2fe6.jpg?imageMogr2/auto-orient%7CimageView2/2/w/800/q/70/format/webp" alt="" className='w-full h-[200px] object-cover rounded-xl' />
-
-                <p className='mt-4 mb-2 text-gray-700 font-bold'>User:<span className='text-lg text-black ms-3'> Jane Smith</span></p>
-                <p className='text-gray-700 font-bold'>Proposed Price: <span className='ms-3 text-emerald-800 text-lg'>$45.00</span></p>
-              </div>
-
-              <div className='mt-5 flex justify-end'>
-                <button onClick={()=>setModalStatus(true)} className='bg-blue-200 px-3 py-2 rounded-lg text-blue-700'>View Details</button>
-              </div>
-
-            </div>
           </div>
 
           {modalStatus && <div className="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -102,34 +158,37 @@ function Adminapproval() {
                     {/* header of modal */}
 
                     <div className='bg-emerald-800 p-4 text-white flex justify-between items-center'>
-                      <p className='text-xl'>Summer Floral Midi Dress</p>
+                      <p className='text-xl'>{viewItem?.title}</p>
                       < FontAwesomeIcon icon={faXmark} className='fa-2x cursor-pointer' onClick={() => setModalStatus(false)} />
                     </div>
                     {/* body of modal */}
                     <div className='p-4'>
                       
-                      <div className='flex flex-col md:flex-row md:justify-between items-center gap-1'>  
-                        <img src="https://hips.hearstapps.com/hmg-prod/images/amazon-winter-dress-2183276870-6736192f0484c.jpg?crop=0.492xw:0.984xh;0.250xw,0&resize=640:*" alt="no image" className='w-[250px] h-[250px] object-cover'/>
+                      <div className='flex flex-col md:flex-row md:justify-between items-center gap-1'> 
 
-                        <img src="https://hips.hearstapps.com/vader-prod.s3.amazonaws.com/1689787958-612gMNDkbcL.jpg?crop=0.889xw:1xh;center,top&resize=980:*" alt="no image" className='w-[250px] h-[250px] object-cover'/>
+                        {viewItem?.uploadImages?.map( (item , index) => ( 
+                          <img src={`${serverurl}/imgUpload/${item?.filename}`} alt="no image" className='w-[250px] h-[250px] object-cover' key={index}/>
+                        ))  }
 
-                        <img src="https://img.kwcdn.com/product/fancy/b002b2e9-4837-47a8-aac8-a7c9dcff2fe6.jpg?imageMogr2/auto-orient%7CimageView2/2/w/800/q/70/format/webp" alt="no image" className='w-[250px] h-[250px] object-cover'/>   
+                        
+
+                           
                       </div>
                       <div className='p-4'>
 
-                        <p className='text-gray-800'>Lightweight cotton midi dress with a vibrant floral print, perfect for summer. Features a V-neck and adjustable spaghetti straps. Excellent used condition, no visible flaws.</p>
+                        <p className='text-gray-800'>{viewItem?.description}</p>
 
-                        <p className='text-gray-800 mt-2'>Category: Dresses</p>
-                        <p className='text-gray-800 '>Size: M</p>
-                        <p className='text-gray-800 '>Condition: Excellent Used</p>
-                        <p className='text-gray-800 '>Material:</p>
+                        <p className='text-gray-800 mt-2'>Category: {viewItem?.category}</p>
+                        <p className='text-gray-800 '>Size: {viewItem?.size}</p>
+                        <p className='text-gray-800 '>Condition: {viewItem?.condition}</p>
+                        <p className='text-gray-800 '>Material: {viewItem?.material}</p>
                         
                       </div>
 
                       <div className='p-4'>
-                        <p className='text-gray-800'>User: Jane Smith</p>
-                        <p className='text-gray-800'>Actual Price:<span className='text-emerald-800 font-bold ms-5 text-lg'> $85.00</span></p>
-                        <p className='text-gray-800'>Proposed Price:<span className='text-emerald-800 font-bold ms-5 text-xl'> $45.00</span></p>
+                        <p className='text-gray-800'>UserMail: {viewItem?.userMail}</p>
+                        <p className='text-gray-800'>Actual Price:<span className='text-emerald-800 font-bold ms-5 text-lg'> ${viewItem?.price}.00</span></p>
+                        <p className='text-gray-800'>Proposed Price:<span className='text-emerald-800 font-bold ms-5 text-xl'> ${viewItem?.dprice}.00</span></p>
                       </div>
 
                     </div>

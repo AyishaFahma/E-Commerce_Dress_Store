@@ -43,6 +43,7 @@ function Adminproducts() {
 
   //state to store url of a image
   const [preview, setpreview] = useState("")
+
   //state to store all url of 3 images
   const [allUploadedImage, setallUploadedImage] = useState([])
 
@@ -120,7 +121,7 @@ function Adminproducts() {
       //if there is uploaded content data should be passed in reqbody as form data 
 
 
-      // 1- create an onj for the formdata class
+      // 1- create an obj for the formdata class
 
       const reqbody = new FormData()
 
@@ -376,7 +377,7 @@ function Adminproducts() {
                 <div>
                   <img src={`${serverurl}/imgUpload/${item?.uploadImages?.[0]?.filename}`} alt="no image" className='w-full h-[200px] object-cover rounded-xl' />
 
-                  <h1 className='text-xl font-bold my-3'>{item?.title}</h1>
+                  <h1 className='text-xl font-bold my-3'>{item?.title.slice(0,20)}...</h1>
 
                   <p className='text-gray-700 font-bold'>SKU : {item?.sku}</p>
                   <p className='text-gray-700 font-bold'>Category: {item?.category}</p>

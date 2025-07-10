@@ -41,6 +41,30 @@ export const removeProductApi = async(id)=>{
 }
 
 
+//api call to get all user selled products for approval
+export const getAllUserProductApi = async()=>{
+    return await commonApi('GET' , `${serverurl}/view-alluser-product`)
+}
+
+
+
+//api to view single items selled by the user when modal opens
+export const getSingleUserItemApi = async(id)=>{
+    return await commonApi('GET' , `${serverurl}/view-single-useritems/${id}`)
+}
+
+
+//api to approve product
+export const approveProductApi = async(id)=>{
+    return await commonApi('PUT' , `${serverurl}/approve-product/${id}`)
+}
+
+
+//api to reject product
+export const rejectProductApi = async(id)=>{
+    return await commonApi('PUT' , `${serverurl}/reject-product/${id}`)
+}
+
 
 
 
@@ -49,4 +73,27 @@ export const removeProductApi = async(id)=>{
 //api to get all products in userside
 export const viewAllProductUserApi = async(reqHeader)=>{
     return await commonApi('GET', `${serverurl}/view-allproduct-user` , "", reqHeader)
+}
+
+//api to get all single category - dresses , tops, bottoms
+export const viewSingleCategoryApi = async(category , reqHeader)=>{
+    return await commonApi('GET' , `${serverurl}/view-single-category?category=${category}` , "" , reqHeader)
+}
+
+
+//api to sell a product by user
+export const addSellProductsApi = async(reqBody , reqHeader)=>{
+    return await commonApi('POST' , `${serverurl}/addto-sell-products` , reqBody , reqHeader)
+}
+
+
+//api to get all selled products
+export const getAllSelledProductApi = async(reqHeader)=>{
+    return await commonApi('GET' , `${serverurl}/view-selled-product` , "" , reqHeader)
+}
+
+
+//api to delete a selled product by user
+export const removeSellProductApi = async(id)=>{
+    return await commonApi('DELETE' , `${serverurl}/delete-sell-product/${id}`)
 }

@@ -1,11 +1,152 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../../components/Footer'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom'
+import { toast, ToastContainer } from 'react-toastify'
+import { addSellProductsApi } from '../../sevices/allApi'
 
 function Sell() {
+
+
+  //state for holding sell products details
+  const [sellDetails, setsellDetails] = useState({
+
+    title: "",
+    size: "",
+    category: "",
+    color: "",
+    condition: "",
+    material: "",
+    description: "",
+    price: "",
+    dprice: "",
+    uploadImages: []
+
+  })
+
+  //console.log(sellDetails);
+
+  //token
+  const [token, settoken] = useState("")
+
+
+  //state to store url of a image
+  const [preview, setpreview] = useState("")
+
+  //state to store all url of 3 images
+  const [allUploadedImage, setallUploadedImage] = useState([])
+
+
+
+
+  const handleUpload = (e) => {
+    console.log(e.target.files);
+
+    const fileArray = sellDetails.uploadImages
+    fileArray.push(e.target.files[0])
+    //console.log(fileArray); //this gives a array
+    // then this all data is updated to uploadImages key
+    setsellDetails({ ...sellDetails, uploadImages: fileArray })
+
+    //to convert a file into url by using createObjectURL()
+
+    const url = URL.createObjectURL(e.target.files[0])
+    console.log(url);
+
+    setpreview(url);
+    let images = allUploadedImage
+    images.push(url)
+    setallUploadedImage(images)
+    console.log(preview);
+    console.log(allUploadedImage);
+
+  }
+
+  //reset function
+  const handleReset = () => {
+    setsellDetails({
+      title: "",
+      size: "",
+      category: "",
+      color: "",
+      condition: "",
+      material: "",
+      description: "",
+      price: "",
+      dprice: "",
+      uploadImages: []
+    })
+    setpreview("")
+    setallUploadedImage([])
+  }
+
+
+  const handleSubmit = async () => {
+
+
+    const { title, size, category, color, condition, material, description, price, dprice, uploadImages } = sellDetails
+
+    console.log(title, size, category, color, condition, material, description, price, dprice, uploadImages);
+
+    if (!title || !size || !category || !color || !condition || !material || !price || !dprice || !description, uploadImages.length == 0) {
+
+      toast.info('Please fill the form completely')
+
+    }
+    else {
+
+      const reqbody = new FormData()
+
+      for (let key in sellDetails) {
+
+        if (key != 'uploadImages') {
+          reqbody.append(key, sellDetails[key])
+        }
+        //here we upload 3 images so that we need to map these items
+        else {
+          sellDetails.uploadImages.map((item) => {
+            reqbody.append("uploadImages", item)
+          })
+        }
+      }
+
+
+      const reqHeader = {
+        "Authorization": `Bearer ${token}`
+      }
+
+
+      const result = await addSellProductsApi(reqbody, reqHeader)
+      console.log("product added result is ",result);
+
+      if(result.status == 200){
+        toast.success("Product saved successfully")
+      }
+      else if(result.status == 402){
+        toast.warning(result.response.data)
+      }
+      else{
+        toast.error('Something went wrong')
+      }
+      handleReset()
+      
+    }
+
+  }
+
+
+  useEffect( ()=>{
+    if(sessionStorage.getItem("token")){
+      const tok = sessionStorage.getItem("token")
+      settoken(tok)
+    }
+
+  })
+
+
+
   return (
     <>
       <Header />
@@ -77,96 +218,83 @@ function Sell() {
               <div className='my-10'>
 
                 <div className="mb-3">
-                  <input type="text" placeholder='Title | eg. Elegant Floral Summer Dress' className='p-2 bg-white rounded w-full outline-0' />
+                  <input type="text" placeholder='Title | eg. Elegant Floral Summer Dress' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.title} onChange={(e) => setsellDetails({ ...sellDetails, title: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
-                  <input type="text" placeholder='Size - XS , S , M , L , XL' className='p-2 bg-white rounded w-full outline-0' />
+                  <input type="text" placeholder='Size - XS , S , M , L , XL' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.size} onChange={(e) => setsellDetails({ ...sellDetails, size: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
-                  <input type="text" placeholder='Category' className='p-2 bg-white rounded w-full outline-0' />
+                  <input type="text" placeholder='Category' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.category} onChange={(e) => setsellDetails({ ...sellDetails, category: e.target.value })} />
                 </div>
 
                 <p className='text-lg text-gray-600 mb-2 mt-10'>Product Details</p>
 
                 <div className="mb-3">
-                  <input type="text" placeholder='Colour' className='p-2 bg-white rounded w-full outline-0' />
+                  <input type="text" placeholder='Colour' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.color} onChange={(e) => setsellDetails({ ...sellDetails, color: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
-                  <input type="text" placeholder='Condition' className='p-2 bg-white rounded w-full outline-0' />
+                  <input type="text" placeholder='Condition' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.condition} onChange={(e) => setsellDetails({ ...sellDetails, condition: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
-                  <input type="text" placeholder='Material' className='p-2 bg-white rounded w-full outline-0' />
+                  <input type="text" placeholder='Material' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.material} onChange={(e) => setsellDetails({ ...sellDetails, material: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
-                  <textarea placeholder='Description' rows={'8'} className='p-2 bg-white rounded w-full outline-0'></textarea>
+                  <textarea value={sellDetails.description} onChange={(e) => setsellDetails({ ...sellDetails, description: e.target.value })} placeholder='Description' rows={'8'} className='p-2 bg-white rounded w-full outline-0'></textarea>
                 </div>
 
-                {/* <div className="mb-3">
-                  <input type="text" placeholder='Bust' className='p-2 bg-white rounded w-full outline-0' />
-                </div>
-
-                <div className="mb-3">
-                  <input type="text" placeholder='Waist' className='p-2 bg-white rounded w-full outline-0' />
-                </div>
-
-                <div className="mb-3">
-                  <input type="text" placeholder='Hip' className='p-2 bg-white rounded w-full outline-0' />
-                </div> */}
 
               </div>
 
 
               <div className='my-10 px-2'>
 
-                {/* <div className="mb-3">
-                  <input type="text" placeholder='Front Length' className='p-2 bg-white rounded w-full outline-0' />
+                <div className="mb-3">
+                  <input type="text" placeholder='$ Actual Product Price' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.price} onChange={(e) => setsellDetails({ ...sellDetails, price: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
-                  <input type="text" placeholder='Back Length' className='p-2 bg-white rounded w-full outline-0' />
-                </div> */}
-
-                <div className="mb-3">
-                  <input type="text" placeholder='$ Actual Product Price' className='p-2 bg-white rounded w-full outline-0' />
-                </div>
-
-                <div className="mb-3">
-                  <input type="text" placeholder='$ Expected Price' className='p-2 bg-white rounded w-full outline-0' />
+                  <input type="text" placeholder='$ Expected Price' className='p-2 bg-white rounded w-full outline-0' value={sellDetails.dprice} onChange={(e) => setsellDetails({ ...sellDetails, dprice: e.target.value })} />
                 </div>
 
 
                 <div className='flex justify-center items-center mt-10 flex-col'>
 
-                  <label htmlFor="uploadBookImg">
-                    <input type="file" id='uploadBookImg' style={{ display: 'none' }} />
+                  {!preview ? <label htmlFor="uploadImages">
+
+                    <input type="file" id='uploadImages' style={{ display: 'none' }} name="uploadImages" onChange={(e) => handleUpload(e)} />
+
                     <img src="https://cdn3d.iconscout.com/3d/premium/thumb/add-new-photo-3d-icon-download-in-png-blend-fbx-gltf-file-formats--logo-picture-empty-states-vol-1-pack-seo-web-icons-9656036.png" alt="no image" style={{ width: '200px', height: '200px' }} />
                   </label>
+                              :
 
-                  {/* <img src="" alt="no image" style={{ width: '200px', height: '200px' }} /> */}
+                  <img src={preview} alt="no image" style={{ width: '200px', height: '200px' }} />}
 
 
                   {/* uploaded book images max 3 */}
 
-                  <div className='mt-10 flex items-center'>
+                  {preview && <div className='mt-10 flex items-center'>
 
 
-                    <img src="https://lh3.googleusercontent.com/13hDaDG4msUqXgVk3ublRiIzBIX8McSNt2kmshy-n54wMqgtFvipKVoi3CSIq3OK2Yfqh1QVFhrDFu8VUKeETtZbPRlgklIC139vCbU=w360-rw" alt="no image" style={{ width: '50px', height: '50px' }} className='mx-2' />
+                    {allUploadedImage?.map( (item , index)=> (
+                      <img src={item} alt="no image" style={{ width: '50px', height: '50px' }} className='mx-2' key={index}/>
+                    )) }
 
                     {/* here max image is 3 */}
 
 
-                    <label htmlFor="uploadBookImg">
-                      <input type="file" id='uploadBookImg' style={{ display: 'none' }} />
+                    {allUploadedImage?.length < 3 && <label htmlFor="uploadImages">
+                      <input type="file" id='uploadImages' style={{ display: 'none' }} name="uploadImages" onChange={(e) => handleUpload(e)}/>
 
                       <FontAwesomeIcon icon={faPlus} className='p-2 shadow-lg/30 bg-gray-300 border border-gray-300 ms-4 cursor-pointer' />
 
-                    </label>
-                  </div>
+                    </label>}
+
+                  </div>}
 
                 </div>
 
@@ -174,8 +302,9 @@ function Sell() {
             </div>
 
             <div className="flex justify-end ">
-              <button type='button' className='bg-amber-700 text-white px-5 py-3 rounded hover:border hover:border-amber-700 hover:text-amber-700 hover:bg-white cursor-pointer'>Reset</button>
-              <button type='button' className='bg-emerald-800 text-white px-5 py-3 rounded hover:border hover:border-emerald-800 hover:text-emerald-800 hover:bg-white ms-4 cursor-pointer'>Submit</button>
+              <button type='button' onClick={handleReset} className='bg-amber-700 text-white px-5 py-3 rounded hover:border hover:border-amber-700 hover:text-amber-700 hover:bg-white cursor-pointer'>Reset</button>
+
+              <button type='button' onClick={handleSubmit} className='bg-emerald-800 text-white px-5 py-3 rounded hover:border hover:border-emerald-800 hover:text-emerald-800 hover:bg-white ms-4 cursor-pointer'>Submit</button>
             </div>
 
           </div>
@@ -195,6 +324,8 @@ function Sell() {
         </div> */}
 
       <Footer />
+
+      <ToastContainer theme='colored' position='top-center' autoClose={2000} />
     </>
   )
 }

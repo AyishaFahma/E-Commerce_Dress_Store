@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import Footer from '../../components/Footer'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCompass, faMap, faRightFromBracket, faSpinner, faTable, faUser } from '@fortawesome/free-solid-svg-icons'
 import { Link } from 'react-router-dom'
+import { getAllSelledProductApi, removeSellProductApi } from '../../sevices/allApi'
+import { serverurl } from '../../sevices/serverurl'
+import { toast, ToastContainer } from 'react-toastify'
 
 function Profile() {
 
@@ -11,6 +14,70 @@ function Profile() {
   const [order, setorder] = useState(false)
   const [sellstatus, setsellstatus] = useState(false)
   const [logout, setlogout] = useState(false)
+
+  //to view all selled products
+  const [allItems, setallItems] = useState([])
+
+  //token
+  const [token, settoken] = useState("")
+
+  //delete item
+  const [deleteItem, setdeleteItem] = useState([])
+
+
+  // function to get all selled products
+  const viewSelledItems = async (token) => {
+
+    console.log('inside all selled products by user');
+    
+
+    const reqHeader = {
+      "Authorization": `Bearer ${token}`
+    }
+
+    const result = await getAllSelledProductApi(reqHeader)
+    //console.log(result);
+    setallItems(result.data)
+
+  }
+  console.log("all selled products", allItems);
+
+
+  //function to delete a selled product
+  const handleDeleteItem = async (id) => {
+
+    const result = await removeSellProductApi(id)
+    console.log(result);
+    if (result.status == 200) {
+      toast.success(result.data)
+      setdeleteItem(result)
+    }
+  }
+  console.log(deleteItem);
+
+
+
+
+  useEffect(() => {
+
+    if (sessionStorage.getItem("token")) {
+      const tok = sessionStorage.getItem("token")
+      settoken(tok)
+
+
+      if (sellstatus == true) {
+        viewSelledItems(tok)
+
+      }
+      else {
+        console.log('Something went wrong');
+
+      }
+    }
+  }, [sellstatus, deleteItem])
+
+
+
 
   return (
     <>
@@ -114,47 +181,64 @@ function Profile() {
 
           {sellstatus && <div>
             {/* this below div is loop based on the item */}
-            <div className="rounded-lg p-4 shadow-sm flex items-center justify-between mb-2">
-              <div className="flex items-center">
-                <img src="https://m.media-amazon.com/images/I/91ssiobY8TL._UY1100_.jpg" alt="" className='w-[150px] h-[150px] object-cover rounded' />
-                <div className="ml-4">
-                  <h1 className="font-semibold text-base">Boutique Wear floral Dress</h1>
-                  <p className="text-gray-600 text-sm"><i>Size XL</i></p>
-                  <h1 className="text-gray-700 text-sm">$ 150</h1>
+
+            {allItems?.length > 0 ?
+
+              allItems?.map((item, index) => (
+                <div className="rounded-lg p-4 shadow-sm flex items-center justify-between mb-2 mt-2" key={index}>
+                  <div className="flex items-center">
+
+                    <img src={`${serverurl}/imgUpload/${item?.uploadImages?.[0]?.filename}`} alt="" className='w-[150px] h-[150px] object-cover rounded' />
+                    <div className="ml-4">
+                      <h1 className="font-semibold text-base">{item?.title.slice(0, 20)}...</h1>
+                      <p className="text-gray-600 text-sm"><i>Size {item?.size}</i></p>
+                      <h1 className="text-gray-700 text-sm">$ {item?.dprice}</h1>
+                    </div>
+                  </div>
+
+                  <div>
+
+                    {/* pending image */}
+                    {item?.status == "Pending" ? <img src="https://t3.ftcdn.net/jpg/05/50/56/18/360_F_550561815_sea9I3MiYLpiL2iwMKkaAwwafMgMuBgK.jpg" alt="" className='w-[100px] h-[60px] mb-2' /> : item?.status == "Approved" ?
+                      //  accepted 
+                      <img src="https://png.pngtree.com/png-vector/20220622/ourmid/pngtree-accepted-received-sign-acknowledged-vector-png-image_18870198.png" alt="" className='w-[100px] h-[80px]' />
+                      :
+                      //  rejected 
+                      <img src="https://freepngimg.com/thumb/categories/1838.png" alt="" className='w-[100px] h-[80px]' />}
+
+
+                    <div className='flex justify-end'>
+                      <button type='button' onClick={() => handleDeleteItem(item._id)} className='bg-red-700 px-3 py-2 rounded-lg text-white w-full'>Delete</button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))
 
-              <div>
-                {/* pending image */}
-                <img src="https://png.pngtree.com/png-vector/20230830/ourmid/pngtree-pending-imminent-rubber-stamp-image_9932560.png" alt="" className='w-[100px] h-[80px]' />
-                {/* accepted */}
-                <img src="https://png.pngtree.com/png-vector/20220622/ourmid/pngtree-accepted-received-sign-acknowledged-vector-png-image_18870198.png" alt="" className='w-[100px] h-[80px]' />
-                {/* rejected */}
-                <img src="https://freepngimg.com/thumb/categories/1838.png" alt="" className='w-[100px] h-[80px]' />
+              //  if not sell yet 
 
-                <div className='flex justify-end'><button className='bg-red-700 px-3 py-2 rounded-lg text-white w-full'>Delete</button></div>
-              </div>
-            </div>
+              :
+              <div className="md:grid grid-cols-3 md:px-10 px-5 my-10  flex justify-center items-center">
+                <div></div>
+                <div className='flex justify-center items-center flex-col'>
+                  <img src="https://assets-v2.lottiefiles.com/a/626eb1a2-1184-11ee-959c-637bd66df669/JMo8cCTp0M.gif" alt="no image" style={{ width: '200px', height: '200px' }} />
+                  <h1 className='text-center text-xl mt-10'>You Haven't sell any Products Yet!!!</h1>
+                  <Link to={'/sell-item'}><button className='my-5 bg-black text-white px-5 py-2 text-lg hover:bg-white hover:text-black hover:border hover:border-black'>SELL NOW</button></Link>
 
-            {/* if no order yet */}
-            <div className="md:grid grid-cols-3 md:px-10 px-5 my-10  flex justify-center items-center">
-              <div></div>
-              <div className='flex justify-center items-center flex-col'>
-                <img src="https://assets-v2.lottiefiles.com/a/626eb1a2-1184-11ee-959c-637bd66df669/JMo8cCTp0M.gif" alt="no image" style={{ width: '200px', height: '200px' }} />
-                <h1 className='text-center text-xl mt-10'>You Haven't sell any Products Yet!!!</h1>
-                <Link to={'/sell-item'}><button className='my-5 bg-black text-white px-5 py-2 text-lg hover:bg-white hover:text-black hover:border hover:border-black'>SELL NOW</button></Link>
-
-              </div>
-              <div></div>
-            </div>
+                </div>
+                <div></div>
+              </div>}
             {/* this is the end of no item yet */}
 
           </div>}
+
+
+
 
         </div>
       </div>
 
       <Footer />
+      <ToastContainer theme='colored' position='top-center' autoClose={2000} />
     </>
   )
 }
